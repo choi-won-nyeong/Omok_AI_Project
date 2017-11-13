@@ -30,14 +30,17 @@ int omok_su[225][2];	// 둔 수를 저장
 int jik[15][15];	// 이기면 해당자리 +1 지면 -1(숫자가 큰 자리에 두게 함) 
 int jik3[15][15];
 int network[15][15][15][15];
+int network2[15][15][15][15];
 int result[2][225];	// 이긴 횟수 
 int a=1, b=5;
 int cnt=0;
 int x, y;
 char s[32];	// 파일의 경로를 가르키는 변수
-char logs_name[9]="\\logs_04";	// 디렉토리 이름
+char logs_name[9]="\\logs_05";	// 디렉토리 이름
 int que_cnt=0;
+int que_cnt2=0;
 net que[11390625];
+net que2[11390625];
 su *head;
 su *tail;
 //head->prev=head;
@@ -290,9 +293,9 @@ int _End_Game(int draw, int select)	// 게임이 종료되면 데이터를 반영함
 	{
 		for(i=0; i<que_cnt; i++)
 		{
-			if(que[i].n%2!=cnt%2 && que[i].n<=cnt-12) network[que[i].i][que[i].j][que[i].k][que[i].l] -= 100;
+			if(que[i].n%2!=cnt%2 && que[i].n>=cnt-12) network[que[i].i][que[i].j][que[i].k][que[i].l] -= 100;	// 첫 수가 cnt%2==1임 
 			else if(que[i].n%2!=cnt%2) network[que[i].i][que[i].j][que[i].k][que[i].l] -= 2;
-			else if(que[i].n<=cnt-12) network[que[i].i][que[i].j][que[i].k][que[i].l] += 100;
+			else if(que[i].n>=cnt-12) network[que[i].i][que[i].j][que[i].k][que[i].l] += 100;
 		}
 	}
 	else if(select=='5')
@@ -314,6 +317,48 @@ int _End_Game(int draw, int select)	// 게임이 종료되면 데이터를 반영함
 				{
 					//printf("%5d", network[i][j][k][l]);
 					fprintf(data, "%10d", network[i][j][k][l]);
+				}
+				//printf("\n");
+				fprintf(data, "\n");
+			}
+			//printf("\n");
+			fprintf(data, "\n");
+		}
+	}
+	
+	for(i=0; i<32; i++) s[i]=0;
+	strcat(s, logs_name);
+	strcat(s, "\\dt_02.txt");
+	
+	if(select=='2')
+	{
+		for(i=0; i<que_cnt2; i++)
+		{
+			if(que2[i].n%2!=cnt%2 && que2[i].n>=cnt-12) network2[que2[i].i][que2[i].j][que2[i].k][que2[i].l] -= 100;
+			else if(que2[i].n%2!=cnt%2) network2[que2[i].i][que2[i].j][que2[i].k][que2[i].l] -= 2;
+			else if(que2[i].n>=cnt-12) network2[que2[i].i][que2[i].j][que2[i].k][que2[i].l] += 100;
+		}
+	}
+	else if(select=='5')
+	{
+		for(i=0; i<que_cnt2; i++)
+		{
+			if(cnt%2!=sw%2) network2[que2[i].i][que2[i].j][que2[i].k][que2[i].l] -= 2;
+		}
+	}
+
+	data=fopen(s, "w");
+	for(i=0; i<15; i++)
+	{
+		for(j=0; j<15; j++)
+		{
+			for(k=0; k<15; k++)
+			{
+				for(l=0; l<15; l++)
+				{
+					//printf("%10d", network2[i][j][k][l]);
+					//pause(); 
+					fprintf(data, "%10d", network2[i][j][k][l]);
 				}
 				//printf("\n");
 				fprintf(data, "\n");
@@ -436,6 +481,18 @@ int _File_Open()	// 로그를 저장할 파일을 연다.
 	
 	for(i=0; i<32; i++) s[i]=0;
 	strcat(s, logs_name);
+	strcat(s, "\\dt_02.txt");
+
+	if( (data = fopen(s, "r+"))==0 )
+	{
+		data = fopen(s, "a+");
+		fclose(data);
+		for(i=0; i<15; i++) for(j=0; j<15; j++) for(k=0; k<15; k++) for(l=0; l<15; l++) network2[i][j][k][l]=0;
+	}
+	else for(i=0; i<15; i++) for(j=0; j<15; j++) for(k=0; k<15; k++) for(l=0; l<15; l++) fscanf(data, "%d", &network2[i][j][k][l]);
+	
+	for(i=0; i<32; i++) s[i]=0;
+	strcat(s, logs_name);
 	strcat(s, "\\data3.txt");
 
 	if( (data3 = fopen(s, "r+"))==0 )
@@ -479,6 +536,7 @@ int _Reset()	// 초기화
 			jik[i][j]=0;
 			jik3[i][j]=0;
 			for(k=0; k<15; k++) for(l=0; l<15; l++) network[i][j][k][l]=0;
+			for(k=0; k<15; k++) for(l=0; l<15; l++) network2[i][j][k][l]=0;
 		}
 	}
 	
@@ -492,6 +550,7 @@ int _Reset()	// 초기화
 	
 	cnt = 0;
 	que_cnt = 0;
+	que_cnt2 = 0;
 	
 	return 0;	
 }
@@ -531,6 +590,29 @@ int _Computer()	// 컴퓨터
 			}
 		}
 	}
+	
+	for(i=0; i<15; i++)
+	{
+		for(j=0; j<15; j++)
+		{
+			for(k=0; k<15; k++)
+			{
+				for(l=0; l<15; l++)
+				{
+					if(rand()%100==1)
+					{
+						network2[i][j][k][l]++;
+						que2[que_cnt2].i=i;
+						que2[que_cnt2].j=j;
+						que2[que_cnt2].k=k;
+						que2[que_cnt2].l=l;
+						que2[que_cnt2].n=cnt+1;
+						que_cnt2++;
+					}
+				}
+			}
+		}
+	}
 
 	for(i=0; i<15; i++)	// jik[k][l]의 가중합계 구하기
 	{
@@ -541,7 +623,8 @@ int _Computer()	// 컴퓨터
 			{
 				for(l=0; l<15; l++)
 				{
-					jik[k][l] += network[i][j][k][l];
+					if(omok[i][j]==1) jik[k][l] += network[i][j][k][l];
+					else jik[k][l] += network2[i][j][k][l];
 				}
 			}
 		}
